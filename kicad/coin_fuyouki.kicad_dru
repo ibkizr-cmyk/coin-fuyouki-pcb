@@ -1,0 +1,9 @@
+(version 1)
+(rule "通常は0.25mm以上"
+  (constraint clearance (min 0.25mm)))
+(rule "24V系は他ネットと0.4mm以上"
+  (condition "A.NetName == 'BST' || A.NetName == 'N24P' || A.NetName == 'ND1' || A.NetName == 'NF' || A.NetName == 'NL' || A.NetName == 'PWRA' || A.NetName == 'PWRB' || A.NetName == 'SW'")
+  (constraint clearance (min 0.4mm)))
+(rule "U2(AP63205)のピン周辺は0.25mm（部品のピッチ由来）"
+  (condition "A.memberOfFootprint('U2') || B.memberOfFootprint('U2')")
+  (constraint clearance (min 0.25mm)))
