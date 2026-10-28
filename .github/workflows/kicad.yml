@@ -21,8 +21,7 @@ jobs:
       - name: Show KiCad version
         run: |
           kicad-cli --version
-          echo "=== files ==="
-          find . -name "*.kicad_pcb" -o -name "*.kicad_dru" | sort
+          find . -name "*.kicad_pcb" | sort
           ls -la kicad/ || ls -la
 
       - name: Run DRC
@@ -30,33 +29,31 @@ jobs:
           mkdir -p out
           PCB=$(find . -name "coin_fuyouki.kicad_pcb" | head -1)
           echo "Using PCB: $PCB"
-          if [ -z "$PCB" ]; then
-            echo "ERROR: coin_fuyouki.kicad_pcb not found"
-            exit 1
-          fi
           kicad-cli pcb drc \
             --output out/DRC_report_v15-42_KiCad10.rpt \
             --format report \
             --refill-zones \
             "$PCB"
-          echo "=== DRC REPORT ==="
           cat out/DRC_report_v15-42_KiCad10.rpt
 
       - name: Export Gerbers and drills
         run: |
           mkdir -p out/gerber
           PCB=$(find . -name "coin_fuyouki.kicad_pcb" | head -1)
+          echo "Using PCB: $PCB"
           kicad-cli pcb export gerbers \
-            --output out/gerber/ \
-            --layers F.Cu,B.Cu,F.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts \
+            -o out/gerber/ \
+            --layers "F.Cu,B.Cu,F.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts" \
             --subtract-soldermask \
+            --check-zones \
             "$PCB"
           kicad-cli pcb export drill \
-            --output out/gerber/ \
+            -o out/gerber/ \
             --format excellon \
             --excellon-separate-th \
-            --units mm \
+            --excellon-units mm \
             "$PCB"
+          echo "=== gerber files ==="
           ls -la out/gerber/
 
       - name: Upload artifact
